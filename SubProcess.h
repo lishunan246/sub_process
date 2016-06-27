@@ -5,94 +5,41 @@
 #ifndef SUB_PROCESS_SUBPROCESS_H
 #define SUB_PROCESS_SUBPROCESS_H
 
-#include <memory>
+
 #include <iostream>
 #include <cstring>
-#include <set>
-
+#include <unordered_map>
+#include <errno.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include "SubProcessHandle.h"
 
 class SubProcess{
 public:
-
-    SubProcessHandle::ptr create(const char *pathname, char *const argv[],char *const envp[])
+    static SubProcess& Instance()
     {
-        pid_t childPid;
-        switch (childPid=fork())
-        {
-            case -1:
-                std::cout<<strerror(errno)<<std::endl;
-                return nullptr;
-            case 0:
+        static SubProcess instance;
+        return instance;
+    };
+    SubProcess(SubProcess const&) = delete;
+    SubProcess(SubProcess&&) = delete;
+    SubProcess& operator=(SubProcess const&) = delete;
+    SubProcess& operator=(SubProcess &&) = delete;
 
-                if(execve(pathname,argv,envp)==-1)
-                {
-                    std::cout<<strerror(errno)<<std::endl;
-                    return nullptr;
-                }
-                break;
-            default:
-                break;
+    SubProcessHandle::ptr create(const char *pathname, const char * argv,const char* a);
+    bool terminate(SubProcessHandle::ptr hdl);
+    bool get_status(SubProcessHandle::ptr hdl);
 
-        }
-        auto h= SubProcessHandle::create(childPid);
-        _handles.insert({h});
-        return h;
-    }
-
-    bool terminate(SubProcessHandle::ptr hdl)
-    {
-        if(kill(hdl->_pid,SIGTERM)==0)
-        {
-            return true;
-        }
-        else
-        {
-            std::cout<<strerror(errno)<<std::endl;
-            return false;
-        }
-    }
-
-    void get_status(SubProcessHandle::ptr hdl)
-    {
-        if(kill(hdl->_pid,0)==0)
-        {
-            std::cout<<"live"<<std::endl;
-        }
-        else
-        {
-            if(errno==ESRCH)
-                std::cout<<"died"<<std::endl;
-        }
-    }
-
-    SubProcess()
-    {
-        if(signal(SIGCHLD,SubProcess::sigchld_handler)==SIG_ERR)
-        {
-            std::cout<<strerror(errno)<<std::endl;
-        }
-    }
-
-    ~SubProcess()
-    {
-
-    }
+protected:
+    SubProcess();
+    ~SubProcess(){}
 
 private:
-    static void sigchld_handler(int signum)
-    {
-        pid_t pid;
-        int   status;
-        while ((pid = waitpid(-1, &status, WNOHANG)) >0)
-        {
-            std::cout<<"pid: "<<pid<<" returns "<<status<<std::endl;
-            //unregister_child(pid, status);   // Or whatever you need to do with the PID
-        }
-    };
+    static void sigchld_handler(int signum);
 
-    std::set<SubProcessHandle::ptr > _handles;
+    std::unordered_map<int,SubProcessHandle::ptr > _handles;
 };
+
 
 
 

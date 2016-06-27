@@ -5,19 +5,8 @@
 #ifndef SUB_PROCESS_SUBPROCESSHANDLE_H
 #define SUB_PROCESS_SUBPROCESSHANDLE_H
 
-#ifdef __linux__
-
 #include <unistd.h>
-#include <errno.h>
-#include <signal.h>
-#include <sys/wait.h>
 #include <iostream>
-
-
-#else
-
-#endif
-
 #include <memory>
 
 class SubProcess;
@@ -27,18 +16,16 @@ public:
     friend class SubProcess;
     using ptr=std::shared_ptr<SubProcessHandle>;
 
-    SubProcessHandle(pid_t pid)
-    {
-        _pid=pid;
-    }
-    static ptr create(pid_t pid)
-    {
-        return std::make_shared<SubProcessHandle>(pid);
-    }
+    SubProcessHandle(SubProcessHandle const&) = delete;
+    SubProcessHandle(SubProcessHandle&&) = delete;
+    SubProcessHandle& operator=(SubProcessHandle const&) = delete;
+    SubProcessHandle& operator=(SubProcessHandle &&) = delete;
+    SubProcessHandle(pid_t pid);
+    static ptr create(pid_t pid);
 
 private:
-    pid_t _pid;
 
+    pid_t _pid;
 };
 
 
