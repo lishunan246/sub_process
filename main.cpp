@@ -13,14 +13,14 @@ int main() {
     else
     {
         cout << "p1!" << endl;
-        s.get_status(x);
+        s.is_running(x);
     }
     if(x2== nullptr)
         cout << "error" << endl;
     else
         cout << "p2!" << endl;
 
-
+    std::cout<<"current running: "<<s.count()<<std::endl;
     sleep(5);
 
     if(x)
@@ -28,10 +28,12 @@ int main() {
 
     sleep(3);
     if(x)
-        s.get_status(x);
+        s.is_running(x);
+    std::cout<<"current running: "<<s.count()<<std::endl;
     sleep(3);
     if(x2)
         s.terminate(x2);
     sleep(1);
+    std::cout<<"current running: "<<s.count()<<std::endl;
     return 0;
 }

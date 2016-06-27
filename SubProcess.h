@@ -28,8 +28,8 @@ public:
 
     SubProcessHandle::ptr create(const char *pathname, const char * argv,const char* a);
     bool terminate(SubProcessHandle::ptr hdl);
-    bool get_status(SubProcessHandle::ptr hdl);
-
+    bool is_running(SubProcessHandle::ptr hdl);
+    size_t count();
 protected:
     SubProcess();
     ~SubProcess(){}

@@ -24,7 +24,12 @@ SubProcessHandle::ptr SubProcess::create(const char *pathname, const char * argv
 
     }
 
-    return SubProcessHandle::create(childPid);
+    auto h= SubProcessHandle::create(childPid);
+    if(h)
+    {
+        _handles.insert({childPid,h});
+    }
+    return h;
 }
 
 bool SubProcess::terminate(SubProcessHandle::ptr hdl)
@@ -40,7 +45,7 @@ bool SubProcess::terminate(SubProcessHandle::ptr hdl)
     }
 }
 
-bool SubProcess::get_status(SubProcessHandle::ptr hdl) {
+bool SubProcess::is_running(SubProcessHandle::ptr hdl) {
     std::cout<<"pid "<<hdl->_pid;
     if(kill(hdl->_pid,0)==0)
     {
@@ -74,6 +79,12 @@ void SubProcess::sigchld_handler(int) {
         SubProcess::Instance()._handles.erase(pid);
     }
 }
+
+size_t SubProcess::count() {
+    return _handles.size();
+}
+
+
 
 
 
